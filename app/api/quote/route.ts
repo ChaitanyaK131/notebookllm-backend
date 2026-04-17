@@ -1,22 +1,7 @@
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function GET() {
   try {
-    const body = await req.json();
-    const { prompt } = body;
-
-    if (!prompt) {
-      return NextResponse.json(
-        { error: "Text required" },
-        {
-          status: 400,
-          headers: {
-            "Access-Control-Allow-Origin": "*"
-          }
-        }
-      );
-    }
-
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -26,9 +11,13 @@ export async function POST(req: Request) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "qwen/qwen-2.5-7b-instruct",
+          model: "quillbot/quillbot-paraphraser",
           messages: [
-            { role: "user", content: prompt }
+            {
+              role: "user",
+              content:
+                "Generate one short motivational quote for students. Keep it under 12 words."
+            }
           ]
         })
       }
@@ -39,7 +28,9 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: true,
-        reply: data.choices?.[0]?.message?.content || "No reply"
+        quote:
+          data.choices?.[0]?.message?.content ||
+          "Stay focused and keep learning."
       },
       {
         headers: {
@@ -50,9 +41,11 @@ export async function POST(req: Request) {
 
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed" },
       {
-        status: 500,
+        success: false,
+        quote: "Discipline today creates success tomorrow."
+      },
+      {
         headers: {
           "Access-Control-Allow-Origin": "*"
         }
@@ -67,7 +60,7 @@ export async function OPTIONS() {
     {
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization"
       }
     }

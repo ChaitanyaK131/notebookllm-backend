@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { prompt } = body;
+    const { text } = await req.json();
 
-    if (!prompt) {
+    if (!text) {
       return NextResponse.json(
         { error: "Text required" },
         {
@@ -28,7 +27,10 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           model: "qwen/qwen-2.5-7b-instruct",
           messages: [
-            { role: "user", content: prompt }
+            {
+              role: "user",
+              content: `Summarize this:\n${text}`
+            }
           ]
         })
       }
@@ -39,7 +41,8 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: true,
-        reply: data.choices?.[0]?.message?.content || "No reply"
+        summary:
+          data.choices?.[0]?.message?.content || "No summary generated"
       },
       {
         headers: {
